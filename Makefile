@@ -87,7 +87,7 @@ docker/run: docker/build
 test: test/create test/verify
 
 .PHONY: test/prerequisites
-test/prerequisites: check_aws_quota
+test/prerequisites:
 	./validate_deps.sh
 	@if [ -z "$(USER)" ] ; then echo "USER is not set."; exit 1; fi
 	@if [ -z "$(OBSERVE_CUSTOMER)" ] ; then echo "OBSERVE_CUSTOMER is not set."; exit 1; fi
