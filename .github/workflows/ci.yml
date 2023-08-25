@@ -110,18 +110,10 @@ jobs:
           echo "providers=[\"${{ github.event.inputs.test_type }}\"]" >> $GITHUB_OUTPUT
         fi
 
-  debug:
-    runs-on: ubuntu-latest
-    needs: [permission_check, build, determine-provider]
-    steps:
-      - name: Debug providers value
-        run: |
-          echo "Providers Value: ${{ needs.determine-provider.outputs.providers }}"
-          echo "Can Write Value: ${{ needs.permission_check.outputs.can-write }}"
-
   test:
     runs-on: ubuntu-latest
     needs: [permission_check, build, determine-provider]
+    if: needs.permission_check.outputs.can-write == 'true'
     name: test ${{ matrix.provider }}
 
     env:
