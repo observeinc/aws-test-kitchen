@@ -68,8 +68,8 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
         tags: |
-          type=sha,priority=1001
-          type=ref,event=branch
+          type=sha
+          type=ref,event=branch,priority=1001
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Set IMAGE_NAME environment variable
@@ -163,8 +163,8 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
         tags: |
-          type=sha,priority=1001
-          type=ref,event=branch
+          type=sha
+          type=ref,event=branch,priority=1001
           type=raw,value=latest,enable={{is_default_branch}}
         
     - name: Build docker image
@@ -225,8 +225,8 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
         tags: |
-          type=sha,priority=1001
-          type=ref,event=branch
+          type=sha
+          type=ref,event=branch,priority=1001
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Push Docker images
