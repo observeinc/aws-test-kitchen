@@ -35,7 +35,7 @@ on:
 
 env:
   USER: gha-${{ github.run_id }}
-  AWS_TEST_KITCHEN_REPO: aws-test-kitchen-public
+  AWS_TEST_KITCHEN_REPO: aws-test-kitchen
 
 jobs:
   permission_check:
