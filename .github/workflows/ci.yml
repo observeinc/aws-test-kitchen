@@ -152,9 +152,6 @@ jobs:
         provider: ${{fromJson(needs.determine-provider.outputs.providers)}}
       
     steps:
-    - name: Debug IMAGE_NAME value
-      run: echo "IMAGE_NAME is set to $IMAGE_NAME"
-  
     - name: Checkout
       uses: actions/checkout@v3
       with:
