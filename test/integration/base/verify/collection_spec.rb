@@ -18,7 +18,7 @@ RSpec.configure do |config|
   end
 end
 
-describe lambda("spec-test-#{provider}-#{user}") do
+describe lambda("#{provider}-#{user}") do
     it { should exist }
     its(:timeout) { should eq 120 }
     its(:runtime) { should eq 'go1.x' }
@@ -30,7 +30,7 @@ s3 = Aws::S3::Client.new
 s3_bucket_found = false
 s3.list_buckets.buckets.each do |bucket|
   # Filter out the ones that match your prefix
-  if bucket.name.start_with?("spec-test-#{provider}-#{user}")
+  if bucket.name.start_with?("#{provider}-#{user}")
     s3_bucket_found = true
     describe s3_bucket(bucket.name) do
       it { should exist }
@@ -49,7 +49,7 @@ firehose = Aws::Firehose::Client.new
 firehose_found = true
 firehose.list_delivery_streams.delivery_stream_names.each do |stream|
   # Filter out the ones that match your prefix
-  if stream.start_with?("spec-test-#{provider}-#{user}")
+  if stream.start_with?("#{provider}-#{user}")
     firehose_found = true
     describe firehose(stream) do
       it { should exist }
@@ -68,7 +68,7 @@ logs = Aws::CloudWatchLogs::Client.new
 cloudwatch_group_found = false
 logs.describe_log_groups.log_groups.each do |log_group|
   # Filter out the ones that match your prefix
-  if log_group.log_group_name.start_with?("/aws/lambda/spec-test-#{provider}-#{user}")
+  if log_group.log_group_name.start_with?("/aws/lambda/#{provider}-#{user}")
     cloudwatch_group_found = true
     describe cloudwatch_logs(log_group.log_group_name) do
       it { should exist }
@@ -91,7 +91,7 @@ events = Aws::CloudWatchEvents::Client.new
 eventbridge_rule_found = false
 events.list_rules.rules.each do |rule|
   # Filter out the ones that match your prefix
-  if rule.name.start_with?("spec-test-#{provider}")
+  if rule.name.start_with?("#{provider}")
     eventbridge_rule_found = true
 
     describe 'EventBridge Rule' do
@@ -106,7 +106,7 @@ events.list_rules.rules.each do |rule|
       # Check if rule targets the correct Lambda function and has correct inputs
       # targets = events.list_targets_by_rule({rule: rule.name}).targets
       # targets.each do |target|
-      #   if target.arn.include?("function:spec-test-#{provider}-#{user}")
+      #   if target.arn.include?("function:#{provider}-#{user}")
       #     it 'has correct input' do
       #       input_json = JSON.parse(target.input)
       #       expected_include_array = ["apigateway:Get*", "autoscaling:Describe*", "cloudformation:Describe*", "cloudformation:List*", "cloudfront:List*", "dynamodb:Describe*", "dynamodb:List*", "ec2:Describe*", "ecs:Describe*", "ecs:List*", "eks:Describe*", "eks:List*", "elasticache:Describe*", "elasticbeanstalk:Describe*", "elasticfilesystem:Describe*", "elasticloadbalancing:Describe*", "elasticmapreduce:Describe*", "elasticmapreduce:List*", "events:List*", "firehose:Describe*", "firehose:List*", "iam:Get*", "iam:List*", "kinesis:Describe*", "kinesis:List*", "kms:Describe*", "kms:List*", "lambda:List*", "logs:Describe*", "organizations:Describe*", "organizations:List*", "rds:Describe*", "redshift:Describe*", "route53:List*", "s3:GetBucket*", "s3:List*", "secretsmanager:List*", "sns:Get*", "sns:List*", "sqs:Get*", "sqs:List*", "synthetics:Describe*", "synthetics:List*"]
