@@ -1,13 +1,23 @@
 name: Run AWS Spec Tests
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-
+  push:
+    branches:
+      - main
+  workflow_call:
+    inputs:
+      test_type:
+        description: 'Type of test: terraform or cloudformation'
+        required: false
+        default: 'terraform'
+        type: 'string'
+      code_sha:
+        description: 'SHA of the terraform or cloudformation code to checkout'
+        required: false
+        type: 'string'
 
 env:
   USER: gha-${{ github.run_id }}
@@ -83,7 +93,6 @@ jobs:
           ghcr.io/${{ github.repository }}:${{ github.ref_name }}
         cache-to: type=gha,mode=max
 
-
   test:
     runs-on: ubuntu-latest
     needs: [permission_check, build]
@@ -100,13 +109,25 @@ jobs:
 
     strategy:
       matrix:
-        provider: [cloudformation, terraform]
-
+        provider: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && [ 'cloudformation', 'terraform' ] || [ github.event.inputs.test_type ] }}
+      
     steps:
     - name: Checkout
       uses: actions/checkout@v3
       with:
         submodules: true
+
+    - name: Checkout Terraform SHA
+      if: matrix.provider == 'terraform' && github.event.inputs.terraform_sha != ''
+      run: |
+        cd terraform-aws-collection
+        git checkout ${{ github.event.inputs.terraform_sha }}
+      
+    - name: Checkout CloudFormation SHA
+      if: matrix.provider == 'cloudformation' && github.event.inputs.cloudformation_sha != ''
+      run: |
+        cd cloudformation-aws-collection
+        git checkout ${{ github.event.inputs.cloudformation_sha }}  
     
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -158,7 +179,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     needs: [permission_check, build, test]
-    if: needs.permission_check.outputs.can-write == 'true'
+    if: needs.permission_check.outputs.can-write == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       packages: write
