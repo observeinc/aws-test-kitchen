@@ -111,7 +111,7 @@ test/clean:
 
 .PHONY: check_aws_quota
 check_aws_quota:
-	@output=$$($(MAKE) docker/run DOCKER_COMMAND='aws cloudtrail describe-trails --query "length(trailList)" --output text'); \
+	output=$$(DOCKER_COMMAND='aws cloudtrail describe-trails --query "length(trailList)" --output text' $(MAKE) docker/run 2>&1 | grep -Eo '[0-9]+' | awk 'END{print}'); \
 	if [ "$$?" -ne "0" ]; then exit 1; fi; \
 	if [ "$$output" -ge "3" ]; then \
 		echo "Number of CloudTrail trails exceeds quota."; \
