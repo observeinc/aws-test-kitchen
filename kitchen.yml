@@ -2,7 +2,7 @@
 driver:
   name: <%= ENV['PROVIDER'] %>
   <% if ENV['PROVIDER'] == 'cloudformation' %>
-  stack_name: spec-test-<%= ENV['PROVIDER'] %>-<%= ENV['USER'] %>
+  stack_name: <%= ENV['PROVIDER'] %>-<%= ENV['USER'] %>
   template_file: cloudformation-aws-collection/templates/collection.yaml
   capabilities: [CAPABILITY_IAM]
   change_set_name: <%= ENV['USER'] %>-change-set
@@ -17,7 +17,7 @@ driver:
     observe_customer: "<%= ENV['OBSERVE_CUSTOMER'] %>"
     observe_token: "<%= ENV['OBSERVE_TOKEN'] %>"
     observe_domain: "<%= ENV['OBSERVE_DOMAIN'] %>"
-    name: spec-test-<%= ENV['PROVIDER'] %>-<%= ENV['USER'] %>
+    name: <%= ENV['PROVIDER'] %>-<%= ENV['USER'] %>
   <% end %>
 
 provisioner:

@@ -12,7 +12,6 @@ on:
       test_type:
         description: 'Type of test: terraform or cloudformation'
         required: true
-        default: 'terraform'
         type: 'string'
       code_sha:
         description: 'SHA of the terraform or cloudformation code to checkout'
@@ -36,16 +35,9 @@ on:
 
 env:
   USER: gha-${{ github.run_id }}
+  AWS_TEST_KITCHEN_REPO: aws-test-kitchen-public
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-        
   permission_check:
     runs-on: ubuntu-latest
     outputs:
@@ -72,10 +64,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.repository_owner }}/aws-test-kitchen-public
+        repository: ${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         submodules: true
     
     - name: Login to GitHub Container Registry
+      if: ${{ inputs.test_type == '' }}
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
@@ -83,13 +76,14 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Docker Buildx
+      if: ${{ inputs.test_type == '' }}
       uses: docker/setup-buildx-action@v2
 
     - name: Metadata for Docker Image
       id: docker_metadata
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
+        images: ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         tags: |
           type=sha
           type=ref,event=branch,priority=1001
@@ -98,11 +92,17 @@ jobs:
     - name: Set IMAGE_NAME environment variable
       id: set_output_image_name
       run: |
-        IMAGE_NAME=$(echo "${DOCKER_METADATA_OUTPUT_TAGS}" | head -n 1)
+        if [[ "${{ inputs.test_type }}" != "" ]]; then
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:main"
+        else
+          IMAGE_NAME=$(echo "${DOCKER_METADATA_OUTPUT_TAGS}" | head -n 1)
+        fi
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
         
+        
     - name: Build docker image
+      if: ${{ inputs.test_type == '' }}
       uses: docker/build-push-action@v4
       with:
         context: .
@@ -112,9 +112,9 @@ jobs:
         labels: ${{ steps.docker_metadata.outputs.labels }}
         cache-from: |
           type=gha
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:latest
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:main
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:${{ github.ref_name }}
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:latest
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:main
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:${{ github.ref_name }}
         cache-to: type=gha,mode=max
 
   determine-provider:
@@ -155,7 +155,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.repository_owner }}/aws-test-kitchen-public
+        repository: ${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         submodules: true
 
     - name: Checkout Terraform SHA
@@ -182,15 +182,17 @@ jobs:
 
     - name: Metadata for Docker Image
       id: docker_metadata
+      if: ${{ inputs.test_type == '' }}
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
+        images: ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         tags: |
           type=sha
           type=ref,event=branch,priority=1001
           type=raw,value=latest,enable={{is_default_branch}}
         
-    - name: Build docker image
+    - name: Build docker image (from cache)
+      if: ${{ inputs.test_type == '' }}
       uses: docker/build-push-action@v4
       with:
         context: .
@@ -200,10 +202,14 @@ jobs:
         labels: ${{ steps.docker_metadata.outputs.labels }}
         cache-from: |
           type=gha
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:latest
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:main
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:${{ github.ref_name }}
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:latest
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:main
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:${{ github.ref_name }}
         cache-to: type=gha,mode=max
+
+    - name: Pull Docker image
+      if: ${{ inputs.test_type != '' }}
+      run: docker pull $IMAGE_NAME
 
     - name: Setup Infra and Run spec tests
       run: make docker/test
@@ -220,7 +226,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     needs: [permission_check, build, test]
-    if: needs.permission_check.outputs.can-write == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ inputs.test_type == '' }} && needs.permission_check.outputs.can-write == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       packages: write
@@ -229,7 +235,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.repository_owner }}/aws-test-kitchen-public
+        repository: ${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         submodules: true
     
     - name: Login to GitHub Container Registry
@@ -246,7 +252,7 @@ jobs:
       id: docker_metadata
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public
+        images: ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         tags: |
           type=sha
           type=ref,event=branch,priority=1001
@@ -262,7 +268,7 @@ jobs:
         labels: ${{ steps.docker_metadata.outputs.labels }}
         cache-from: |
           type=gha
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:latest
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:main
-          ghcr.io/${{ github.repository_owner }}/aws-test-kitchen-public:${{ github.ref_name }}
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:latest
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:main
+          ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:${{ github.ref_name }}
         cache-to: type=gha,mode=max
