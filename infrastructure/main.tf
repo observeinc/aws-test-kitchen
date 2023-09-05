@@ -1,5 +1,5 @@
 locals {
-  organization = "observeinc"
+  organization = "hutchic-observe-meta"
   repository   = "aws-test-kitchen"
 }
 
@@ -34,8 +34,8 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
   }
 }
 
-resource "aws_iam_role" "github_actions_release" {
-  name = "${local.repository}-gha-release"
+resource "aws_iam_role" "github_actions_ci" {
+  name = "${local.repository}-gha-ci"
 
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
 
@@ -46,12 +46,12 @@ resource "aws_iam_role" "github_actions_release" {
 }
 
 resource "aws_iam_role_policy_attachment" "admin_policy_attachment" {
-  role       = aws_iam_role.github_actions_release.name
+  role       = aws_iam_role.github_actions_ci.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-resource "github_actions_secret" "aws_release_role" {
+resource "github_actions_secret" "aws_ci_role" {
   repository      = local.repository
   secret_name     = "AWS_ROLE_ARN"
-  plaintext_value = aws_iam_role.github_actions_release.arn
+  plaintext_value = aws_iam_role.github_actions_ci.arn
 }
