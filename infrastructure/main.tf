@@ -1,5 +1,5 @@
 locals {
-  organization = "hutchic-observe-meta"
+  organization = "observeinc"
   repository   = "aws-test-kitchen"
 }
 
