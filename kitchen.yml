@@ -29,6 +29,10 @@ platforms:
 transport:
   name: exec
 
+lifecycle:
+  post_destroy:
+    - rspec -c -f documentation --default-path '/workdir'  -P 'test/integration/destruction/verify/destruction_spec.rb'
+
 verifier:
   name: awspec
   patterns:

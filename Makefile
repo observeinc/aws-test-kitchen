@@ -84,7 +84,7 @@ docker/run: docker/build
 	fi
 
 .PHONY: test
-test: test/create test/verify
+test: test/create test/verify test/clean
 
 .PHONY: test/prerequisites
 test/prerequisites:
@@ -107,7 +107,6 @@ test/verify: test/create
 test/clean:
 	kitchen destroy || true
 	rm -rf .kitchen/* || true
-	aws logs delete-log-group --log-group-name /aws/lambda/$(PROVIDER)-$(USER) || true
 
 .PHONY: check_aws_quota
 check_aws_quota:
