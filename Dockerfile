@@ -1,8 +1,8 @@
 # Fetch Terraform
-FROM hashicorp/terraform:1.5@sha256:1b97a8fea07928585d74ad83683aabe6df2ac24fdc06cbd5382bfaa688063b05 as terraform-source
+FROM hashicorp/terraform:1.5@sha256:9fc0d70fb0f858b0af1fadfcf8b7510b1b61e8b35e7a4bb9ff39f7f6568c321d as terraform-source
 
 # Your original Dockerfile starts here with some modifications
-FROM ruby:3.2-bookworm@sha256:90bc604b69ff0dd6ed1b6053b02e52fb788adff7b437faa91c9970553b959c69
+FROM ruby:3.2-bookworm@sha256:f2dee7ccdebc2bddcb0fd3e5691e55b952cd0447ffc19cb0bde19eb788719e73
 
 # Copy Terraform binary from terraform-source
 COPY --from=terraform-source /bin/terraform /usr/local/bin/
