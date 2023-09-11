@@ -108,6 +108,12 @@ test/clean:
 	kitchen destroy || true
 	rm -rf .kitchen/* || true
 
+.PHONY: fix-submodules
+fix-submodules:
+	git submodule foreach 'git reset --hard'
+	git submodule update --remote
+	git submodule update
+
 .PHONY: check_aws_quota
 check_aws_quota:
 	output=$$(DOCKER_COMMAND='aws cloudtrail describe-trails --query "length(trailList)" --output text' $(MAKE) docker/run 2>&1 | grep -Eo '[0-9]+' | awk 'END{print}'); \
