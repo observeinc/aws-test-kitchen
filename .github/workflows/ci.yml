@@ -164,12 +164,14 @@ jobs:
       if: matrix.provider == 'terraform' && inputs.code_sha != ''
       run: |
         cd terraform-aws-collection
+        git fetch
         git checkout ${{ inputs.code_sha }}
       
     - name: Checkout CloudFormation SHA
       if: matrix.provider == 'cloudformation' && inputs.code_sha != ''
       run: |
         cd cloudformation-aws-collection
+        git fetch
         git checkout ${{ inputs.code_sha }}
     
     - name: Login to GitHub Container Registry
