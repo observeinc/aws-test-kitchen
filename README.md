@@ -1,6 +1,18 @@
-# Test Kitchen with Docker and CloudFormation
+# Infrastructure as Code Testing
 
-This project uses Test Kitchen with Docker to validate our infrastructure and cloudformation. It includes a Makefile for easy command handling and a Dockerfile to create a standardized testing environment.
+This project uses Test Kitchen with Docker to validate our infrastructure. It includes a Makefile for easy command handling and a Dockerfile to create a standardized testing environment.
+
+## Table of Contents
+- [Environment Variables](#environment-variables)
+- [Running Tests with Docker](#docker)
+  - [Prerequisites](#prerequisites)
+  - [Testing](#testing)
+- [Running Tests Manually](#manual)
+  - [Prerequisites](#prerequisites-1)
+  - [Testing](#testing-1)
+- [Test Kitchen 101](#test-kitchen-101)
+- [GitHub Actions - Manual Workflow Trigger](#github-actions---manual-workflow-trigger)
+
 
 ## Environment Variables
 
@@ -77,3 +89,21 @@ Teardown the infrastructure
 kitchen destroy
 ```
 
+## GitHub Actions - Manual Workflow Trigger
+
+In addition to the automated tests that run on pull requests and pushes to the `main` branch, you can also manually trigger the testing workflow using GitHub's `workflow_dispatch` event.
+
+### How to Manually Trigger the Workflow:
+
+1. Navigate to the "Actions" tab in the GitHub repository.
+2. Select the desired workflow from the left sidebar.
+3. Click on the "Run workflow" button on the right side.
+4. Select the branch on which you want to run the workflow.
+5. Provide the required inputs:
+   - `test_type`: Choose between 'terraform' or 'cloudformation'.
+   - `code_sha`: Provide the SHA of the terraform or cloudformation code to checkout.
+6. Click the "Run workflow" button.
+
+This allows for more flexibility in testing, especially in scenarios where you might want to test specific changes or configurations without making a pull request or a push.
+
+For more details on GitHub's workflow dispatch event, refer to the [official documentation](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow).
