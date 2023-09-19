@@ -33,23 +33,31 @@ docker/clean: docker/test/clean
 
 .PHONY: docker/build
 docker/build:
-	@if [ -z "$(shell docker images -q $(IMAGE_NAME))" ]; then \
-		echo "Image does not exist. Building..."; \
-		if [ "$(DOCKER_CMD)" = "buildx" ]; then \
-			git_branch=$$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g') && \
-			docker buildx build --load \
-			--cache-from=$(IMAGE_REPO):latest \
-			--cache-from=$(IMAGE_REPO):main \
-			--cache-from=$(IMAGE_REPO):$$git_branch \
-			--build-arg UID=$(UID) \
-			--build-arg GID=$(GID) \
-			-t $(IMAGE_NAME) .; \
-		else \
-			docker build --build-arg UID=$(UID) --build-arg GID=$(GID) -t $(IMAGE_NAME) .; \
-		fi; \
+	git fetch --all
+	@if git diff --quiet HEAD main -- Gemfile Gemfile.lock Dockerfile; then \
+		echo "No changes detected in Gemfile, Gemfile.lock, or Dockerfile compared to main. Pulling latest image from main branch."; \
+		docker pull $(IMAGE_REPO):main && docker tag $(IMAGE_REPO):main $(IMAGE_NAME); \
 	else \
-		echo "Image already exists. Skipping build."; \
+		echo "Changes detected. Building new image."; \
+		if [ -z "$(shell docker images -q $(IMAGE_NAME))" ]; then \
+			echo "Image does not exist. Building..."; \
+			if [ "$(DOCKER_CMD)" = "buildx" ]; then \
+				git_branch=$$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g') && \
+				docker buildx build --load \
+				--cache-from=$(IMAGE_REPO):latest \
+				--cache-from=$(IMAGE_REPO):main \
+				--cache-from=$(IMAGE_REPO):$$git_branch \
+				--build-arg UID=$(UID) \
+				--build-arg GID=$(GID) \
+				-t $(IMAGE_NAME) .; \
+			else \
+				docker build --build-arg UID=$(UID) --build-arg GID=$(GID) -t $(IMAGE_NAME) .; \
+			fi; \
+		else \
+			echo "Image already exists. Skipping build."; \
+		fi; \
 	fi
+
 
 .PHONY: docker/%
 docker/%:

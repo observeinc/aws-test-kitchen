@@ -225,6 +225,12 @@ jobs:
       if: ${{ inputs.test_type != null }}
       run: docker pull $IMAGE_NAME
 
+    - name: Setup AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: us-west-2
+
     - name: Check AWS Quota
       run: |
         attempts=0
@@ -237,12 +243,6 @@ jobs:
           sleep 120
           attempts=$((attempts + 1))
         done
-
-    - name: Setup AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: us-west-2
 
     - name: Setup Infra and Run spec tests
       run: make docker/test
