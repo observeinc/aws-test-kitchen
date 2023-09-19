@@ -22,6 +22,16 @@ on:
         description: 'SHA of the terraform or cloudformation code to checkout'
         required: true
         type: 'string'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test: terraform or cloudformation'
+        required: true
+        type: 'string'
+      code_sha:
+        description: 'SHA of the terraform or cloudformation code to checkout'
+        required: true
+        type: 'string'
     secrets:
       OBSERVE_CUSTOMER:
         required: true

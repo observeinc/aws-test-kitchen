@@ -122,3 +122,8 @@ check_aws_quota:
 		echo "Number of CloudTrail trails exceeds quota."; \
 		exit 1; \
 	fi
+
+.PHONY: reset-submodules
+reset-submodules:
+	git submodule update --init --recursive
+	git submodule foreach --recursive 'git reset --hard'
