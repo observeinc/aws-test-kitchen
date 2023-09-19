@@ -22,6 +22,15 @@ on:
         description: 'SHA of the terraform or cloudformation code to checkout'
         required: true
         type: 'string'
+    secrets:
+      OBSERVE_CUSTOMER:
+        required: true
+      OBSERVE_TOKEN:
+        required: true
+      OBSERVE_DOMAIN:
+        required: false
+      AWS_ROLE_ARN:
+        required: true
   workflow_dispatch:
     inputs:
       test_type:
@@ -32,15 +41,6 @@ on:
         description: 'SHA of the terraform or cloudformation code to checkout'
         required: true
         type: 'string'
-    secrets:
-      OBSERVE_CUSTOMER:
-        required: true
-      OBSERVE_TOKEN:
-        required: true
-      OBSERVE_DOMAIN:
-        required: false
-      AWS_ROLE_ARN:
-        required: true
 
 env:
   USER: gha-${{ github.run_id }}
