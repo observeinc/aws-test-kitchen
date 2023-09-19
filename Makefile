@@ -113,7 +113,7 @@ test/verify: test/create
 
 .PHONY: test/clean
 test/clean:
-	kitchen destroy || true
+	kitchen destroy base-aws || true
 	rm -rf .kitchen/* || true
 
 .PHONY: fix-submodules
