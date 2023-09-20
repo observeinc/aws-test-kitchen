@@ -2,9 +2,15 @@ PROVIDER ?= cloudformation
 
 DOCKER_CMD := $(shell docker buildx version >/dev/null 2>&1 && echo "buildx" || echo "build")
 
-GIT_REMOTE := $(shell git remote get-url origin | sed -e 's/.*[\/:]\([^/]*\/[^/]*\)\(\.git\)*$/\1/')
+
+RAW_GIT_REMOTE := $(shell git remote get-url origin)
+GIT_REMOTE := $(shell echo $(RAW_GIT_REMOTE) | awk -F'/' '{print $$NF}' | sed 's/\.git$$//')
+GIT_ORG := $(shell echo $(RAW_GIT_REMOTE) | awk -F':' '{print $$2}' | awk -F'/' '{print $$1}')
+
+
+
 DOCKER_REGISTRY ?= ghcr.io
-IMAGE_REPO ?= $(DOCKER_REGISTRY)/$(GIT_REMOTE)
+IMAGE_REPO = $(DOCKER_REGISTRY)/$(GIT_ORG)/$(GIT_REMOTE)
 GIT_SHA := $(shell git rev-parse --short HEAD)
 IMAGE_TAG ?= $(GIT_SHA)
 IMAGE_NAME ?= $(IMAGE_REPO):$(IMAGE_TAG)
@@ -59,8 +65,6 @@ docker/build:
 			echo "Image already exists. Skipping build."; \
 		fi; \
 	fi
-
-
 
 .PHONY: docker/%
 docker/%:

@@ -46,7 +46,7 @@ end
 
 # Get all Firehose delivery streams
 firehose = Aws::Firehose::Client.new
-firehose_found = true
+firehose_found = false
 firehose.list_delivery_streams.delivery_stream_names.each do |stream|
   # Filter out the ones that match your prefix
   if stream.start_with?("#{provider}-#{user}")
