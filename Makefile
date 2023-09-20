@@ -2,7 +2,7 @@ PROVIDER ?= cloudformation
 
 DOCKER_CMD := $(shell docker buildx version >/dev/null 2>&1 && echo "buildx" || echo "build")
 
-GIT_REMOTE := $(shell git remote get-url origin | sed -e 's/.*[\/:]\([^/]*\/[^/]*\)\.git/\1/')
+GIT_REMOTE := $(shell git remote get-url origin | sed -e 's/.*[\/:]\([^/]*\/[^/]*\)\(\.git\)*$/\1/')
 DOCKER_REGISTRY ?= ghcr.io
 IMAGE_REPO ?= $(DOCKER_REGISTRY)/$(GIT_REMOTE)
 GIT_SHA := $(shell git rev-parse --short HEAD)
