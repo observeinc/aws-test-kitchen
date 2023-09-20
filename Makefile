@@ -36,7 +36,7 @@ docker/clean: docker/test/clean
 .PHONY: docker/build
 docker/build:
 	git fetch --all
-	git fetch origin main:main
+	git fetch origin main:main || true
 	@if git diff --quiet HEAD main -- Gemfile Gemfile.lock Dockerfile; then \
 		echo "No changes detected in Gemfile, Gemfile.lock, or Dockerfile compared to main. Pulling latest image from main branch."; \
 		echo "Debug: IMAGE_REPO = $(IMAGE_REPO)"; \
