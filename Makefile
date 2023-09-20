@@ -35,9 +35,9 @@ docker/clean: docker/test/clean
 docker/build:
 	git fetch --all
 	@if git diff --quiet HEAD main -- Gemfile Gemfile.lock Dockerfile; then \
-		@echo "No changes detected in Gemfile, Gemfile.lock, or Dockerfile compared to main. Pulling latest image from main branch."; \
-		@echo "Debug: IMAGE_REPO = $(IMAGE_REPO)"
-		@echo "Debug: IMAGE_NAME = $(IMAGE_NAME)"
+		echo "No changes detected in Gemfile, Gemfile.lock, or Dockerfile compared to main. Pulling latest image from main branch."; \
+		echo "Debug: IMAGE_REPO = $(IMAGE_REPO)"; \
+		echo "Debug: IMAGE_NAME = $(IMAGE_NAME)"; \
 		docker pull $(IMAGE_REPO):main && docker tag $(IMAGE_REPO):main $(IMAGE_NAME); \
 	else \
 		echo "Changes detected. Building new image."; \
@@ -59,6 +59,7 @@ docker/build:
 			echo "Image already exists. Skipping build."; \
 		fi; \
 	fi
+
 
 
 .PHONY: docker/%
