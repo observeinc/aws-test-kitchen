@@ -169,6 +169,7 @@ jobs:
       with:
         repository: ${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}
         submodules: true
+        fetch-depth: 0
 
     - name: Checkout Terraform SHA
       if: matrix.provider == 'terraform' && inputs.code_sha != ''
