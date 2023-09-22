@@ -88,13 +88,16 @@ end
 
 # Get all EventBridge rules
 events = Aws::CloudWatchEvents::Client.new
-eventbridge_rule_found = false
-events.list_rules.rules.each do |rule|
-  # Filter out the ones that match your prefix
-  if rule.name.start_with?("#{provider}")
-    eventbridge_rule_found = true
 
-    describe 'EventBridge Rule' do
+describe 'EventBridge Rules' do
+  rules = events.list_rules.rules.select { |rule| rule.name.start_with?("#{provider}") }
+  
+  it 'has at least one rule with the desired prefix' do
+    expect(rules.size).to be > 0
+  end
+
+  rules.each do |rule|
+    context "Rule #{rule.name}" do
       it 'exists' do
         expect(rule).not_to be_nil
       end
@@ -104,24 +107,24 @@ events.list_rules.rules.each do |rule|
       end
 
       # Check if rule targets the correct Lambda function and has correct inputs
-      # targets = events.list_targets_by_rule({rule: rule.name}).targets
-      # targets.each do |target|
-      #   if target.arn.include?("function:#{provider}-#{user}")
-      #     it 'has correct input' do
-      #       input_json = JSON.parse(target.input)
-      #       expected_include_array = ["apigateway:Get*", "autoscaling:Describe*", "cloudformation:Describe*", "cloudformation:List*", "cloudfront:List*", "dynamodb:Describe*", "dynamodb:List*", "ec2:Describe*", "ecs:Describe*", "ecs:List*", "eks:Describe*", "eks:List*", "elasticache:Describe*", "elasticbeanstalk:Describe*", "elasticfilesystem:Describe*", "elasticloadbalancing:Describe*", "elasticmapreduce:Describe*", "elasticmapreduce:List*", "events:List*", "firehose:Describe*", "firehose:List*", "iam:Get*", "iam:List*", "kinesis:Describe*", "kinesis:List*", "kms:Describe*", "kms:List*", "lambda:List*", "logs:Describe*", "organizations:Describe*", "organizations:List*", "rds:Describe*", "redshift:Describe*", "route53:List*", "s3:GetBucket*", "s3:List*", "secretsmanager:List*", "sns:Get*", "sns:List*", "sqs:Get*", "sqs:List*", "synthetics:Describe*", "synthetics:List*"]
-      #       expected_include_array.each do |expected_element|
-      #         expect(input_json['snapshot']['include']).to include(expected_element)
-      #       end
-      #     end
-      #   end
-      # end
-    end
-  end
-end
+      targets = events.list_targets_by_rule({ rule: rule.name }).targets
 
-describe 'EventBridge rules' do
-  it 'has at least one matching rule' do
-    expect(eventbridge_rule_found).to be true
+      it 'has at least one target' do
+        expect(targets.size).to be > 0
+      end
+
+      expected_include_array = ["apigateway:Get*", "autoscaling:Describe*", "cloudformation:Describe*", "cloudformation:List*", "cloudfront:List*", "dynamodb:Describe*", "dynamodb:List*", "ec2:Describe*", "ecs:Describe*", "ecs:List*", "eks:Describe*", "eks:List*", "elasticbeanstalk:Describe*", "elasticache:Describe*", "elasticfilesystem:Describe*", "elasticloadbalancing:Describe*", "elasticmapreduce:Describe*", "elasticmapreduce:List*", "events:List*", "firehose:Describe*", "firehose:List*", "iam:Get*", "iam:List*", "kinesis:Describe*", "kinesis:List*", "kms:Describe*", "kms:List*", "lambda:List*", "logs:Describe*", "organizations:Describe*", "organizations:List*", "rds:Describe*", "redshift:Describe*", "route53:List*", "s3:GetBucket*", "s3:List*", "secretsmanager:List*", "sns:Get*", "sns:List*", "sqs:Get*", "sqs:List*", "synthetics:Describe*", "synthetics:List*"]
+
+      targets.each do |target|
+        if target.arn.include?("function:#{provider}-#{user}")
+          it 'has correct input' do
+            input_json = JSON.parse(target.input)
+            expected_include_array.each do |expected_element|
+              expect(input_json['snapshot']['include']).to include(expected_element)
+            end
+          end
+        end
+      end
+    end
   end
 end

@@ -124,3 +124,11 @@ rspec test/integration/base/verify/collection_spec.rb:55 # run the test at line 
 
 rspec test/integration/base/verify/collection_spec.rb -e 'Firehose group' #run the test described as Firhose group
 ```
+
+Interactive debugger
+```
+gem install byebug # or equivalent
+
+require byebug
+byebug # where you want to pause in the test file
+```
