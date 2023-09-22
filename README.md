@@ -107,3 +107,20 @@ In addition to the automated tests that run on pull requests and pushes to the `
 This allows for more flexibility in testing, especially in scenarios where you might want to test specific changes or configurations without making a pull request or a push.
 
 For more details on GitHub's workflow dispatch event, refer to the [official documentation](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow).
+
+## Developing
+
+```
+make docker/run
+aws sts get-caller-identity #check your aws credentials
+kitchen verify #standup the infrastructure
+```
+
+Once the infrastructure is setup we can skip infra setup and run the tests directly
+```
+rspec test/integration/base/verify/collection_spec.rb #run entire file
+
+rspec test/integration/base/verify/collection_spec.rb:55 # run the test at line 55 (use the `it` line)
+
+rspec test/integration/base/verify/collection_spec.rb -e 'Firehose group' #run the test described as Firhose group
+```
