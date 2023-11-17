@@ -21,8 +21,8 @@ end
 describe lambda("#{provider}-#{user}") do
     it { should exist }
     its(:timeout) { should eq 120 }
-    its(:runtime) { should eq 'go1.x' }
-    its(:handler) { should eq 'main' }
+    its(:runtime) { should eq 'provided.al2' }
+    its(:handler) { should eq 'bootstrap' }
 end
 
 # Get all S3 buckets

@@ -66,6 +66,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs: permission_check
     outputs:
       image_name: ${{ steps.set_output_image_name.outputs.image_name }}
 
@@ -125,6 +126,14 @@ jobs:
           ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:main
           ghcr.io/${{ github.repository_owner }}/${{ env.AWS_TEST_KITCHEN_REPO }}:${{ github.ref_name }}
         cache-to: type=gha,mode=max
+    
+    - name: Provision DCE
+      if: needs.permission_check.outputs.can-write == 'true'
+      uses: observeinc/github-action-dce@1.0.1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        email: 'colin.hutchinson+gha@observeinc.com'
 
   determine-provider:
     runs-on: ubuntu-latest
@@ -226,24 +235,12 @@ jobs:
       if: ${{ inputs.test_type != null }}
       run: docker pull $IMAGE_NAME
 
-    - name: Setup AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Use DCE
+      uses: observeinc/github-action-dce@1.0.1
       with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: us-west-2
-
-    - name: Check AWS Quota
-      run: |
-        attempts=0
-        until make check_aws_quota; do
-          if [ $attempts -ge 10 ]; then
-            echo "Exceeded maximum retries for quota check."
-            exit 1
-          fi
-          echo "Failed to meet quota. Retrying in 2 minutes..."
-          sleep 120
-          attempts=$((attempts + 1))
-        done
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        email: 'colin.hutchinson+gha@observeinc.com'
 
     - name: Setup Infra and Run spec tests
       run: make docker/test
@@ -256,6 +253,20 @@ jobs:
       run: make docker/clean
       env:
         PROVIDER: ${{ matrix.provider }}
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
+    - name: Decomission DCE
+      if: needs.permission_check.outputs.can-write == 'true'
+      uses: observeinc/github-action-dce@1.0.1
+      with:
+        action-type: 'decommission'
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
   
   push:
     runs-on: ubuntu-latest
