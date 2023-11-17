@@ -252,8 +252,13 @@ jobs:
       env:
         PROVIDER: ${{ matrix.provider }}
 
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
     - name: Decomission DCE
-      if: always()
+      if: needs.permission_check.outputs.can-write == 'true'
       uses: observeinc/github-action-dce@1.0.1
       with:
         action-type: 'decommission'
