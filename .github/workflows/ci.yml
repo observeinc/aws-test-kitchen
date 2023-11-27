@@ -29,8 +29,10 @@ on:
         required: true
       OBSERVE_DOMAIN:
         required: false
-      AWS_ROLE_ARN:
+      AWS_ACCESS_KEY_ID:
         required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true      
   workflow_dispatch:
     inputs:
       test_type:
