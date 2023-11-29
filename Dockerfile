@@ -1,5 +1,5 @@
 # Fetch Terraform
-FROM hashicorp/terraform:1.6@sha256:2006f3ae9b19a3b704beb9f0b5a31a9a0b3290c98ffc71293ef4823fe5002dd1 as terraform-source
+FROM hashicorp/terraform:1.6@sha256:e46b41c74b6f036c255e2082bcd6284054b108508bae16813bc1257a0e70e2dd as terraform-source
 
 # Your original Dockerfile starts here with some modifications
 FROM ruby:3.2-bookworm@sha256:39d33ab3b46dbfd84609871cf56364d36ba2d9b12731f6bc2fc04afd5274b9d8
