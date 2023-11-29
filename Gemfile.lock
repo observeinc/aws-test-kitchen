@@ -1778,7 +1778,7 @@ GEM
     sync (0.5.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    test-kitchen (3.5.1)
+    test-kitchen (3.6.0)
       bcrypt_pbkdf (~> 1.0)
       chef-utils (>= 16.4.35)
       ed25519 (~> 1.2)
